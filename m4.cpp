@@ -25,39 +25,33 @@ struct Flight
 */
 int parseLine(char* source, char* destination, int* fare, char* line)
 {
-	char* token;
-	char* next_token = NULL;
-	token = strtok_s(line, ",", &next_token);
-	if (token == NULL)
+	char* comma_position = strchr(line, ',');
+	if (comma_position == NULL)
 	{
 		//display error if comma is missing
 		printf("Error: Missing comma in line\n");
 		return 0;
 	}
+	strncpy_s(source, 20, line, comma_position - line);
+	source[comma_position - line] = '\0';
 
-	strcpy_s(source, 20, token);
+	char* destination_position = comma_position + 1;
 
-	token = strtok_s(NULL, ",", &next_token);
-	if (token == NULL)
+	comma_position = strchr(destination_position, ',');
+
+	if (comma_position == NULL)
 	{
 		//display error if missing fare in line
-		printf("Error: Missing fare in line\n");
-		return 0;
-	}
-
-	//converting fare to integar
-	*fare = atoi(token);
-
-	token = strtok_s(NULL, ",",&next_token);
-	if (token == NULL)
-	{
-		//display error if missing destination in line
 		printf("Error: Missing destination in line\n");
 		return 0;
 	}
 
-	//copying destination into destination array
-	strcpy_s(destination, 20, token);
+	strncpy_s(destination, 20, destination_position, comma_position - destination_position);
+	destination[comma_position - destination_position] = '\0';
+
+	//converting fare to integar
+	*fare = atoi(comma_position + 1);
+
 	return 1;
 }
 
@@ -118,7 +112,7 @@ void displayLeastFareDetails(struct Flight* flights, int count)
 {
 	if (count == 0)
 	{
-		printf("No fligt information avaliable\n");
+		printf("No flight information avaliable\n");
 		return;
 	}
 	int min_fare = flights[0].fare;
@@ -131,7 +125,7 @@ void displayLeastFareDetails(struct Flight* flights, int count)
 			min_index = i;
 		}
 	}
-	//displa
+	//displaying the lowest fare
 	printf("Lowest fare: %s: %s to %s, Fare $%d\n", flights[min_index].source, flights[min_index].source, flights[min_index].destination, flights[min_index].fare);
 }
 
@@ -150,7 +144,7 @@ int main()
 		if (fopen_s(&flights_file, filenames[i], "r") != 0)
 		{
 			printf("Error: Unable to open %s\n", filenames[i]);
-			//return 1 indicating failure to open file
+			//indicating failure to open file
 			return 1;
 		}
 
